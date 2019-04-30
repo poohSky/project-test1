@@ -44,27 +44,29 @@
 /* USER CODE BEGIN Includes */
 void ShiftClock(void)
 {
-	HAL_GPIO_
+	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_2,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_2,GPIO_PIN_RESET);
 }
 
 void LatchClock(void)
 {
-
+	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_1,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_1,GPIO_PIN_RESET);
 }
 
 void ByteDataWrite(uint8_t data)
 {
 	for(uint8_t i=0;i<8;i++)
 	{
-		if(data & 0b10000000)
-			HAL_GPIO
-		else
-			HAL_
-
+		if(data & 0b10000000){
+			HAL_GPIO_WritePin(GPIOA,GPIO_PIN_0,GPIO_PIN_SET);
+		}
+		else {
+			HAL_GPIO_WritePin(GPIOA,GPIO_PIN_0,GPIO_PIN_RESET);
+		}
 			ShiftClock();
 		data = data<<1;
 	}
-
 	LatchClock();
 }
 
@@ -74,9 +76,7 @@ static void MX_GPIO_Init(void);
 
 int main(void)
 {
-	uint8_t index = 0;
 
-	HAL_HPIO
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -105,21 +105,16 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  volatile char led=0x01;
+
+  uint8_t index=0;
 
   while (1)
   {
-	  //GPIOB->BRR= (1<<10) | (1<<11);
-	  for(int i=0;i<8;i++)
-	  {
-		  HAL_GPIO_WritePin(GPIOA,1<<i,GPIO_PIN_SET);
-		  HAL_Delay(500);
-	  }
-	  for(int i=0;i<8;i++)
-	  	  {
-	  		  HAL_GPIO_WritePin(GPIOA,1<<i,GPIO_PIN_RESET);
-	  		  HAL_Delay(500);
-	  	  }
+	  uint8_t pattern = 1<< index;
+			  index = (index+1)%8;
+			  ByteDataWrite(pattern);
+			  HAL_Delay(500);
+	 //GPIOB->BRR= (1<<10) | (1<<11);
 	 // GPIOB->BSRR = (1<<10) | (1<<11);
 	  //HAL_Delay(500);
 
@@ -199,6 +194,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
