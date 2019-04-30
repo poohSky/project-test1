@@ -40,8 +40,6 @@
 #include "main.h"
 #include "stm32f1xx_hal.h"
 
-
-/* USER CODE BEGIN Includes */
 void ShiftClock(void)
 {
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_2,GPIO_PIN_SET);
@@ -59,10 +57,10 @@ void ByteDataWrite(uint8_t data)
 	for(uint8_t i=0;i<8;i++)
 	{
 		if(data & 0b10000000){
-			HAL_GPIO_WritePin(GPIOA,GPIO_PIN_0,GPIO_PIN_SET);
+			HAL_GPIO_WritePin(GPIOA,GPIO_PIN_0,GPIO_PIN_RESET);
 		}
 		else {
-			HAL_GPIO_WritePin(GPIOA,GPIO_PIN_0,GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(GPIOA,GPIO_PIN_0,GPIO_PIN_SET);
 		}
 			ShiftClock();
 		data = data<<1;
@@ -76,62 +74,44 @@ static void MX_GPIO_Init(void);
 
 int main(void)
 {
-
-  /* USER CODE BEGIN 1 */
-
-  /* USER CODE END 1 */
-
-  /* MCU Configuration----------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
   SystemClock_Config();
-
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  /* USER CODE BEGIN 2 */
-
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-
-  uint8_t index=0;
-
+  int state=1;
+  int i=0;
   while (1)
   {
-	  uint8_t pattern = 1<< index;
-			  index = (index+1)%8;
-			  ByteDataWrite(pattern);
-			  HAL_Delay(500);
-	 //GPIOB->BRR= (1<<10) | (1<<11);
-	 // GPIOB->BSRR = (1<<10) | (1<<11);
-	  //HAL_Delay(500);
-
-
-  /* USER CODE END WHILE */
-
-  /* USER CODE BEGIN 3 */
-
+	  uint8_t pattern;
+	  if(HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_0)==0)
+	  {
+		  state=1;
+	  }
+	  else if(HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_1)==0)
+	  {
+		  state=0;
+	  }
+	  if(state==1)
+	  {
+		  pattern = 1<< i;
+		  ByteDataWrite(pattern);
+		  HAL_Delay(300);
+		  i++;
+		  if(i>=8)
+			  i=0;
+	  }
+	  else
+	  {
+		  pattern = 1<< i;
+		  		  ByteDataWrite(pattern);
+		  		  HAL_Delay(300);
+		  		  i--;
+		  		  if(i<0)
+		  			  i=7;
+	  }
   }
-  /* USER CODE END 3 */
-
+  return 0;
 }
 
-/**
-  * @brief System Clock Configuration
-  * @retval None
-  */
 void SystemClock_Config(void)
 {
 
